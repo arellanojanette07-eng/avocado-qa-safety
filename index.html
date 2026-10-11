@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avocado QA & Safety</title>
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="ltr">
+    <header>
+      <h1 data-key="app_title">🥑 Avocado QA & Food Safety</h1>
+      <div class="lang-select-container">
+        <select id="lang-select" class="lang-picker" aria-label="language selector">
+          <option value="en">English</option>
+          <option value="ne">नेपाली (Nepali)</option>
+          <option value="bn">বাংলা (Bengali)</option>
+          <option value="ar">العربية (Arabic)</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="ur">اردو (Urdu)</option>
+        </select>
+        <button id="header-logout" class="logout-btn hidden" type="button" data-key="sign_out">Sign Out</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="view-login" class="card">
+        <h2 class="login-title" data-key="sys_gateway">System Gateway</h2>
+        <p class="login-subtitle" data-key="login_sub">Please enter your credentials issued by the Quality Assurance Administrator.</p>
+
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label data-key="lbl_username">Username</label>
+            <input id="login-username" type="text" autocomplete="username" required />
+          </div>
+
+          <div class="form-group">
+            <label data-key="lbl_password">Password</label>
+            <input id="login-password" type="password" autocomplete="current-password" required />
+          </div>
+
+          <button type="submit" class="btn" data-key="btn_authenticate">Authenticate</button>
+        </form>
+
+        <div id="login-status" class="status-message" aria-live="polite"></div>
+      </section>
+
+      <section id="view-user" class="card hidden">
+        <div id="user-section-badge" class="section-badge">Loading Department...</div>
+        <h2 id="user-form-title" class="user-form-title" data-key="qa_insp_sheet">QA Inspection Sheet</h2>
+
+        <form id="monitoring-form" novalidate>
+          <div class="form-group">
+            <label data-key="lbl_inspector">Inspector Name</label>
+            <input id="form-inspector" class="readonly-field" type="text" readonly />
+          </div>
+
+          <div class="form-group">
+            <label data-key="lbl_temp">Critical Control Temperature (°C) - If Applicable</label>
+            <input id="form-temperature" type="text" inputmode="decimal" placeholder="e.g., 4.2 or N/A" />
+          </div>
+
+          <div class="form-group">
+            <label data-key="lbl_status">Sanitation & Safety Status</label>
+            <select id="form-checklist" required>
+              <option value="" disabled selected data-key="opt_select">Select Current Assessment</option>
+              <option value="Fully Compliant" data-key="opt_compliant">Fully Compliant (No issues detected)</option>
+              <option value="Minor Variance" data-key="opt_minor">Minor Variance (Corrected on-site)</option>
+              <option value="Critical Non-Compliance" data-key="opt_critical">Critical Non-Compliance (Action required)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label data-key="lbl_notes">Observation Logs / Corrective Actions</label>
+            <textarea id="form-notes" rows="4" required placeholder="Detail logs..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label data-key="lbl_photo">Evidence Image (Camera / Library Capture)</label>
+            <input id="form-photo" type="file" accept="image/*" required />
+          </div>
+
+          <button type="submit" class="btn" data-key="btn_submit_report">Log Audit to Central Database</button>
+        </form>
+
+        <div id="user-status" class="status-message" aria-live="polite"></div>
+      </section>
+
+      <section id="view-admin" class="hidden">
+        <div class="nav-links">
+          <button type="button" class="btn" onclick="toggleAdminSubView('admin-reports')" data-key="btn_rev_reports">Review Reports</button>
+          <button type="button" class="btn btn-secondary" onclick="toggleAdminSubView('admin-users')" data-key="btn_manage_keys">Manage Access Keys</button>
+        </div>
+
+        <div id="subview-reports" class="card">
+          <h2 class="admin-title" data-key="master_audit_logs">Master Audit Logs</h2>
+
+          <div class="form-group">
+            <label data-key="lbl_filter">Filter Reports by Operations Wing</label>
+            <select id="filter-section" onchange="renderReports()">
+              <option value="ALL" data-key="wing_all">All Categories Combined</option>
+              <option value="hot section" data-key="wing_hot">Hot Section</option>
+              <option value="warehouse" data-key="wing_warehouse">Warehouse</option>
+              <option value="garde manger" data-key="wing_garde">Garde Manger</option>
+              <option value="fleet" data-key="wing_fleet">Fleet Logistics</option>
+              <option value="housekeeping" data-key="wing_housekeeping">Housekeeping</option>
+              <option value="packing and preparation" data-key="wing_packing_prep">Packing & Preparation</option>
+              <option value="packing" data-key="wing_packing">Packing</option>
+              <option value="repair and maintenance" data-key="wing_repair">Repair & Maintenance</option>
+              <option value="bakery and sweets" data-key="wing_bakery">Bakery & Sweets</option>
+              <option value="quality and food safty" data-key="wing_qa">Quality & Food Safety</option>
+              <option value="butchery" data-key="wing_butchery">Butchery</option>
+            </select>
+          </div>
+
+          <div id="reports-feed"></div>
+        </div>
+
+        <div id="subview-users" class="card hidden">
+          <h2 class="admin-title" data-key="gen_user_keys">Generate User Keys</h2>
+
+          <form id="user-creation-form" novalidate>
+            <div class="form-group">
+              <label data-key="lbl_assign_username">Assign Username</label>
+              <input id="new-username" type="text" required />
+            </div>
+
+            <div class="form-group">
+              <label data-key="lbl_assign_password">Assign Protected Password</label>
+              <input id="new-password" type="text" required />
+            </div>
+
+            <div class="form-group">
+              <label data-key="lbl_auth_wing">Authorized Wing Assignment Only</label>
+              <select id="new-section" required>
+                <option value="" disabled selected data-key="opt_assign_sector">Assign targeted sector</option>
+                <option value="hot section" data-key="wing_hot">Hot Section</option>
+                <option value="warehouse" data-key="wing_warehouse">Warehouse</option>
+                <option value="garde manger" data-key="wing_garde">Garde Manger</option>
+                <option value="fleet" data-key="wing_fleet">Fleet Logistics</option>
+                <option value="housekeeping" data-key="wing_housekeeping">Housekeeping</option>
+                <option value="packing and preparation" data-key="wing_packing_prep">Packing & Preparation</option>
+                <option value="packing" data-key="wing_packing">Packing</option>
+                <option value="repair and maintenance" data-key="wing_repair">Repair & Maintenance</option>
+                <option value="bakery and sweets" data-key="wing_bakery">Bakery & Sweets</option>
+                <option value="quality and food safty" data-key="wing_qa">Quality & Food Safety</option>
+                <option value="butchery" data-key="wing_butchery">Butchery</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn" data-key="btn_save_access">Save & Register User Access</button>
+          </form>
+
+          <div id="admin-status" class="status-message" aria-live="polite"></div>
+
+          <h3 class="active-creds" data-key="active_creds">Active Access Credentials</h3>
+          <div id="users-list-container"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

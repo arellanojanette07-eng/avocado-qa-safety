@@ -1,0 +1,21 @@
+[{
+  "id": "admin-1",
+  "username": "admin",
+  "password": "123",
+  "role": "admin",
+  "section": "all"
+},
+{
+  "id": "user-hot-1",
+  "username": "hotsection_user",
+  "password": "123",
+  "role": "user",
+  "section": "hot section"
+},
+{
+  "id": "user-butchery-1",
+  "username": "butchery_user",
+  "password": "123",
+  "role": "user",
+  "section": "butchery"
+}]
