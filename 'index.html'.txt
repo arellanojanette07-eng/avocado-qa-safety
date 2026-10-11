@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avocado Catering QA & Food Safety</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary: #4CAF50; /* Avocado Green */
+            --dark-green: #2E7D32;
+            --accent: #FFC107;
+            --bg: #F4F6F4;
+            --text: #333;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
+        .rtl { direction: rtl; text-align: right; }
+        .ltr { direction: ltr; text-align: left; }
+        header { background: var(--dark-green); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 10px; }
+        header h1 { margin: 0; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .lang-select-container { display: flex; align-items: center; gap: 5px; }
+        .lang-picker { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px; background: white; cursor: pointer; }
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; box-sizing: border-box; }
+        .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; box-sizing: border-box; }
+        .btn:hover { background: var(--dark-green); }
+        .btn-secondary { background: #e0e0e0; color: #333; margin-top: 10px; }
+        .btn-secondary:hover { background: #ccc; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #555; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #fafafa; }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; background: white; }
+        .hidden { display: none !important; }
+        .nav-links { display: flex; gap: 10px; }
+        .logout-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .logout-btn:hover { background: rgba(255,255,255,0.3); }
+        .section-badge { background: var(--accent); color: #333; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        .report-card { border-left: 5px solid var(--primary); background: #fdfdfd; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; border-top: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee; }
+        .report-card img { max-width: 100%; border-radius: 6px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-height: 250px; object-fit: cover; }
+        .report-meta { font-size: 12px; color: #666; margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 4px; }
+        .user-item { display: flex; justify-content: space-between; background: #f9f9f9; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px; font-size: 14px; align-items: center; border: 1px solid #eee; }
+        .user-item span strong { color: var(--dark-green); }
+    </style>
+</head>
+<body class="ltr">
+
+<header>
+    <h1 data-key="app_title">🥑 Avocado QA & Food Safety</h1>
+    <div class="lang-select-container">
+        <select id="lang-select" class="lang-picker" onchange="changeLanguage(this.value)">
+            <option value="en">English</option>
+            <option value="ne">नेपाली (Nepali)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="ar">العربية (Arabic)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="ur">اردو (Urdu)</option>
+        </select>
+        <button id="header-logout" class="logout-btn hidden" onclick="logout()" data-key="sign_out">Sign Out</button>
+    </div>
+</header>
+
+<div class="container">
+    <div id="view-login" class="card">
+        <h2 style="text-align: center; margin-top:0; color: var(--dark-green);" data-key="sys_gateway">System Gateway</h2>
+        <p style="text-align: center; color: #666; font-size: 14px; margin-bottom: 24px;" data-key="login_sub">Please enter your credentials issued by the Quality Assurance Administrator.</p>
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label data-key="lbl_username">Username</label>
+                <input type="text" id="login-username" required>
+            </div>
+            <div class="form-group">
+                <label data-key="lbl_password">Password</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <button type="submit" class="btn" data-key="btn_authenticate">Authenticate</button>
+        </form>
+    </div>
+
+    <div id="view-user" class="card hidden">
+        <div id="user-section-badge" class="section-badge">Loading Department...</div>
+        <h2 style="margin-top: 0;" id="user-form-title" data-key="qa_insp_sheet">QA Inspection Sheet</h2>
+        <form id="monitoring-form" onsubmit="handleFormSubmit(event)">
+            <div class="form-group">
+                <label data-key="lbl_inspector">Inspector Name</label>
+                <input type="text" id="form-inspector" readonly style="background: #e9ecef; color: #495057;">
+            </div>
+            <div class="form-group">
+                <label data-key="lbl_temp">Critical Control Temperature (°C) - If Applicable</label>
+                <input type="text" id="form-temperature">
+            </div>
+            <div class="form-group">
+                <label data-key="lbl_status">Sanitation & Safety Status</label>
+                <select id="form-checklist" required>
+                    <option value="" disabled selected data-key="opt_select">Select Current Assessment</option>
+                    <option value="Fully Compliant" data-key="opt_compliant">Fully Compliant (No issues detected)</option>
+                    <option value="Minor Variance" data-key="opt_minor">Minor Variance (Corrected on-site)</option>
+                    <option value="Critical Non-Compliance" data-key="opt_critical">Critical Non-Compliance (Action required)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label data-key="lbl_notes">Observation Logs / Corrective Actions</label>
+                <textarea id="form-notes" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label data-key="lbl_photo">Evidence Image (Camera / Library Capture)</label>
+                <input type="file" id="form-photo" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn" data-key="btn_submit_report">Log Audit to Central Database</button>
+        </form>
+    </div>
+
+    <div id="view-admin" class="hidden">
+        <div class="nav-links" style="margin-bottom: 15px;">
+            <button class="btn" style="flex: 1;" onclick="toggleAdminSubView('admin-reports')" data-key="btn_rev_reports">Review Reports</button>
+            <button class="btn btn-secondary" style="flex: 1; margin:0;" onclick="toggleAdminSubView('admin-users')" data-key="btn_manage_keys">Manage Access Keys</button>
+        </div>
+        <div id="subview-reports" class="card">
+            <h2 style="margin-top:0; color: var(--dark-green);" data-key="master_audit_logs">Master Audit Logs</h2>
+            <div class="form-group">
+                <label data-key="lbl_filter">Filter Reports by Operations Wing</label>
+                <select id="filter-section" onchange="renderReports()">
+                    <option value="ALL" data-key="wing_all">All Categories Combined</option>
+                    <option value="hot section" data-key="wing_hot">Hot Section</option>
+                    <option value="warehouse" data-key="wing_warehouse">Warehouse</option>
+                    <option value="garde manger" data-key="wing_garde">Garde Manger</option>
+                    <option value="fleet" data-key="wing_fleet">Fleet Logistics</option>
+                    <option value="housekeeping" data-key="wing_housekeeping">Housekeeping</option>
+                    <option value="packing and preparation" data-key="wing_packing_prep">Packing & Preparation</option>
+                    <option value="packing" data-key="wing_packing">Packing</option>
+                    <option value="repair and maintenance" data-key="wing_repair">Repair & Maintenance</option>
+                    <option value="bakery and sweets" data-key="wing_bakery">Bakery & Sweets</option>
+                    <option value="quality and food safty" data-key="wing_qa">Quality & Food Safety</option>
+                    <option value="butchery" data-key="wing_butchery">Butchery</option>
+                </select>
+            </div>
+            <div id="reports-feed"></div>
+        </div>
+        <div id="subview-users" class="card hidden">
+            <h2 style="margin-top:0; color: var(--dark-green);" data-key="gen_user_keys">Generate User Keys</h2>
+            <form onsubmit="handleUserCreation(event)">
+                <div class="form-group">
+                    <label data-key="lbl_assign_username">Assign Username</label>
+                    <input type="text" id="new-username" required>
+                </div>
+                <div class="form-group">
+                    <label data-key="lbl_assign_password">Assign Protected Password</label>
+                    <input type="text" id="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label data-key="lbl_auth_wing">Authorized Wing Assignment Only</label>
+                    <select id="new-section" required>
+                        <option value="" disabled selected data-key="opt_assign_sector">Assign targeted sector</option>
+                        <option value="hot section" data-key="wing_hot">Hot Section</option>
+                        <option value="warehouse" data-key="wing_warehouse">Warehouse</option>
+                        <option value="garde manger" data-key="wing_garde">Garde Manger</option>
+                        <option value="fleet" data-key="wing_fleet">Fleet Logistics</option>
+                        <option value="housekeeping" data-key="wing_housekeeping">Housekeeping</option>
+                        <option value="packing and preparation" data-key="wing_packing_prep">Packing & Preparation</option>
+                        <option value="packing" data-key="wing_packing">Packing</option>
+                        <option value="repair and maintenance" data-key="wing_repair">Repair & Maintenance</option>
+                        <option value="bakery and sweets" data-key="wing_bakery">Bakery & Sweets</option>
+                        <option value="quality and food safty" data-key="wing_qa">Quality & Food Safety</option>
+                        <option value="butchery" data-key="wing_butchery">Butchery</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn" data-key="btn_save_access">Save & Register User Access</button>
+            </form>
+            <h3 style="color:#555;" data-key="active_creds">Active Access Credentials</h3>
+            <div id="users-list-container"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const langData = {
+        en: {
+            app_title: "🥑 Avocado QA & Food Safety", sign_out: "Sign Out", sys_gateway: "System Gateway",
+            login_sub: "Please enter your credentials issued by the Quality Assurance Administrator.",
+            lbl_username: "Username", lbl_password: "Password", btn_authenticate: "Authenticate",
+            qa_insp_sheet: "QA Inspection Sheet", lbl_inspector: "Inspector Name", lbl_temp: "Critical Control Temperature (°C) - If Applicable",
+            lbl_status: "Sanitation & Safety Status", opt_select: "Select Current Assessment", opt_compliant: "Fully Compliant (No issues detected)",
+            opt_minor: "Minor Variance (Corrected on-site)", opt_critical: "Critical Non-Compliance (Action required)",
+            lbl_notes: "Observation Logs / Corrective Actions", lbl_photo: "Evidence Image (Camera / Library Capture)",
+            btn_submit_report: "Log Audit to Central Database", btn_rev_reports: "Review Reports", btn_manage_keys: "Manage Access Keys",
+            master_audit_logs: "Master Audit Logs", lbl_filter: "Filter Reports by Operations Wing", wing_all: "All Categories Combined",
+            wing_hot: "Hot Section", wing_warehouse: "Warehouse", wing_garde: "Garde Manger", wing_fleet: "Fleet Logistics",
+            wing_housekeeping: "Housekeeping", wing_packing_prep: "Packing & Preparation", wing_packing: "Packing",
+            wing_repair: "Repair & Maintenance", wing_bakery: "Bakery & Sweets", wing_qa: "Quality & Food Safety", wing_butchery: "Butchery",
+            gen_user_keys: "Generate User Keys", lbl_assign_username: "Assign Username", lbl_assign_password: "Assign Protected Password",
+            lbl_auth_wing: "Authorized Wing Assignment Only", opt_assign_sector: "Assign targeted sector", btn_save_access: "Save & Register User Access",
+            active_creds: "Active Access Credentials", alert_success: "Inspection record submitted successfully to quality ledger.",
+            no_reports: "No safety logs matching this track category found.", msg_user_exists: "This username already exists!", msg_access_granted: "Access granted for "
+        },
+        ne: {
+            app_title: "🥑 एभोकाडो क्यूए र खाद्य सुरक्षा", sign_out: "साइन आउट", sys_gateway: "प्रणाली गेटवे",
+            login_sub: "कृपया गुणस्तर आश्वासन प्रशासकद्वारा जारी गरिएको आफ्नो प्रमाणहरू प्रविष्ट गर्नुहोस्।",
+            lbl_username: "प्रयोगकर्ता नाम", lbl_password: "पासवर्ड", btn_authenticate: "प्रमाणित गर्नुहोस्",
+            qa_insp_sheet: "गुणस्तर निरीक्षण फारम", lbl_inspector: "निरीक्षकको नाम", lbl_temp: "क्रिटिकल कन्ट्रोल तापमान (°C) - यदि लागू भएमा",
+            lbl_status: "सरसफाई र सुरक्षा स्थिति", opt_select: "वर्तमान मूल्याङ्कन छान्नुहोस्", opt_compliant: "पूर्ण रूपमा अनुरूप (कुनै समस्या भेटिएन)",
+            opt_minor: "सानो भिन्नता (साइटमै सुधार गरिएको)", opt_critical: "गम्भीर गैर-अनुपालन (कारबाही आवश्यक)",
+            lbl_notes: "निरीक्षण लग / सुधारात्मक कारबाहीहरू", lbl_photo: "प्रमाण छवि (क्यामेरा / ग्यालेरी क्याप्चर)",
+            btn_submit_report: "केन्द्रीय डाटाबेसमा अडिट लग गर्नुहोस्", btn_rev_reports: "रिपोर्टहरू समीक्षा गर्नुहोस्", btn_manage_keys: "पहुँच कुञ्जीहरू व्यवस्थित गर्नुहोस्",
+            master_audit_logs: "मास्टर अडिट लगहरू", lbl_filter: "सञ्चालन शाखा द्वारा रिपोर्ट फिल्टर गर्नुहोस्", wing_all: "सबै कोटीहरू सँगै",
+            wing_hot: "हट सेक्सन (तातो खाना)", wing_warehouse: "गोदाम (वेरहाउस)", wing_garde: "गार्ड मन्जर (चिसो खाना)", wing_fleet: "यातायात (फ्लीट)",
+            wing_housekeeping: "हाउसकिपिङ", wing_packing_prep: "प्याकिङ र तयारी", wing_packing: "प्याकिङ",
+            wing_repair: "मर्मत र सम्भार", wing_bakery: "बेकरी र मिठाई", wing_qa: "गुणस्तर र खाद्य सुरक्षा", wing_butchery: "बुचरी (मासु विभाग)",
+            gen_user_keys: "प्रयोगकर्ता कुञ्जीहरू उत्पन्न गर्नुहोस्", lbl_assign_username: "प्रयोगकर्ता नाम तोक्नुहोस्", lbl_assign_password: "सुरक्षित पासवर्ड तोक्नुहोस्",
+            lbl_auth_wing: "अधिकृत शाखा असाइनमेन्ट मात्र", opt_assign_sector: "लक्षित क्षेत्र तोक्नुहोस्", btn_save_access: "बचत गर्नुहोस् र पहुँच दर्ता गर्नुहोस्",
+            active_creds: "सक्रिय पहुँच प्रमाणहरू", alert_success: "निरीक्षण रिपोर्ट सफलतापूर्वक केन्द्रीय डाटाबेसमा बुझाइयो।",
+            no_reports: "यस वर्गसँग मिल्दो कुनै सुरक्षा लगहरू फेلا परेनन्।", msg_user_exists: "यो प्रयोगकर्ता नाम पहिले नै अवस्थित छ!", msg_access_granted: "पहुँच अनुमति दिइयो: "
+        },
+        bn: {
+            app_title: "🥑 অ্যাভোকাডো কিউএ এবং খাদ্য সুরক্ষা", sign_out: "লগ আউট", sys_gateway: "সিস্টেম গেটওয়ে",
+            login_sub: "কোয়ালিটি অ্যাসুরেন্স অ্যাডমিনিস্ট্রেটর দ্বারা প্রদত্ত ইউজারনেম এবং পাসওয়ার্ড লিখুন।",
+            lbl_username: "ইউজারনেم", lbl_password: "পাসওয়ার্ড", btn_authenticate: "প্রবেশ করুন",
+            qa_insp_sheet: "কিউএ পরিদর্শন শীট", lbl_inspector: "পরিদর্শকের নাম", lbl_temp: "ক্রিটিক্যাল কন্ট্রোল তাপমাত্রা (°C) - প্রযোজ্য হলে",
+            lbl_status: "পরিচ্ছন্নতা ও নিরাপত্তা অবস্থা", opt_select: "বর্তমান মূল্যায়ন নির্বাচন করুন", opt_compliant: "সম্পূর্ণ কমপ্লায়েন্ট (কোন সমস্যা নেই)",
+            opt_minor: "সামান্য ত্রুটি (অন-সাইট সংশোধন করা হয়েছে)", opt_critical: "গুরুতর অ-কমপ্লায়েন্স (ব্যবস্থা নেওয়া প্রয়োজন)",
+            lbl_notes: "পর্যবেক্ষণ লগ / সংশোধনমূলক ব্যবস্থা", lbl_photo: "প্রমাণ ছবি (ক্যামেরা / গ্যালারি ক্যাপচার)",
+            btn_submit_report: "সেন্ট্রাল ডাটাবেসে জমা দিন", btn_rev_reports: "রিপোর্ট পর্যালোচনা করুন", btn_manage_keys: "অ্যাক্সেস কী পরিচালনা করুন",
+            master_audit_logs: "مাস্টার অডিট লগ", lbl_filter: "বিভাগ দ্বারা রিপোর্ট ফিল্টার করুন", wing_all: "সব বিভাগ একসাথে",
+            wing_hot: "হট সেকশন", wing_warehouse: "ওয়্যারহাউস (গুদাম)", wing_garde: "গার্ড ম্যাঞ্জার", wing_fleet: "পরিবহন (ফ্লিট)",
+            wing_housekeeping: "হাউসকিপिंग", wing_packing_prep: "প্যাকিং এবং প্রস্তুতি", wing_packing: "প্যাকিং",
+            wing_repair: "মেরামত ও রক্ষণাবেক্ষণ", wing_bakery: "বেকারি এবং মিষ্টি", wing_qa: "গুণমান এবং খাদ্য নিরাপত্তা", wing_butchery: "কসাইখানা (বুচারি)",
+            gen_user_keys: "ইউজার আইডি তৈরি করুন", lbl_assign_username: "ইউজারনেম বরাদ্দ করুন", lbl_assign_password: "পাসওয়ার্ড বরাদ্দ করুন",
+            lbl_auth_wing: "শুধুমাত্র অনুমোদিত বিভাগ", opt_assign_sector: "নির্দিষ্ট বিভাগ নির্বাচন করুন", btn_save_access: "সংরক্ষণ করুন এবং রেজিস্টার করুন",
+            active_creds: "সক্রিয় ব্যবহারকারী আইডি", alert_success: "পরিদর্শন রিপোর্ট সফলভাবে ডাটাবেসে সংরক্ষণ করা হয়েছে।",
+            no_reports: "এই বিভাগের কোনো রিপোর্ট পাওয়া যায়নি।", msg_user_exists: "এই ইউজারনেমটি ইতিমধ্যে বিদ্যমান!", msg_access_granted: "অ্যাক্সেস মঞ্জুর করা হয়েছে: "
+        },
+        ar: {
+            app_title: "🥑 أفوكادو لتوكيد الجودة وسلامة الغذاء", sign_out: "تسجيل الخروج", sys_gateway: "بوابة النظام",
+            login_sub: "يرجى إدخال بيانات الاعتماد الصادرة عن مسؤول توكيد الجودة.",
+            lbl_username: "اسم المستخدم", lbl_password: "كلمة المرور", btn_authenticate: "تسجيل الدخول",
+            qa_insp_sheet: "استمارة فحص الجودة", lbl_inspector: "اسم المفتش", lbl_temp: "درجة الحرارة الحرجة (°م) - إن وجدت",
+            lbl_status: "حالة النظافة والسلامة", opt_select: "حدد التقييم الحالي", opt_compliant: "مطابق تمامًا (لم يتم رصد أي مشاكل)",
+            opt_minor: "مخالفة بسيطة (تم تصحيحها في الموقع)", opt_critical: "عدم تطابق حرج (مطلوب اتخاذ إجراء)",
+            lbl_notes: "سجل الملاحظات / الإجراءات التصحيحية", lbl_photo: "صورة الدليل (التقاط كاميرا / استوديو)",
+            btn_submit_report: "تسجيل التقرير في قاعدة البيانات", btn_rev_reports: "مراجعة التقارير", btn_manage_keys: "إدارة صلاحيات الوصول",
+            master_audit_logs: "سجلات التدقيق الرئيسية", lbl_filter: "تصفية التقارير حسب القسم التشغيلي", wing_all: "جميع الأقسام مدمجة",
+            wing_hot: "القسم الساخن", wing_warehouse: "المستودع", wing_garde: "المطبخ البارد", wing_fleet: "الأسطول والخدمات اللوجستية",
+            wing_housekeeping: "التدبير المنزلي والنظافة", wing_packing_prep: "التعبئة والتجهيز", wing_packing: "التعبئة والتغليف",
+            wing_repair: "الإصلاح والصيانة", wing_bakery: "المخبوزات والحلويات", wing_qa: "الجودة وسلامة الغذاء", wing_butchery: "الملحمة",
+            gen_user_keys: "إنشاء حساب مستخدم جديد", lbl_assign_username: "تعيين اسم المستخدم", lbl_assign_password: "تعيين كلمة المرور",
+            lbl_auth_wing: "تعيين القسم المصرح به فقط", opt_assign_sector: "اختر القسم المستهدف", btn_save_access: "حفظ وتسجيل الصلاحية",
+            active_creds: "بيانات الاعتماد النشطة", alert_success: "تم إرسال سجل التفتيش بنجاح إلى سجل الجودة المركزي.",
+            no_reports: "لم يتم العثور على سجلات سلامة مطابقة لهذا القسم.", msg_user_exists: "اسم المستخدم هذا موجود بالفعل!", msg_access_granted: "تم منح صلاحية الوصول لـ "
+        },
+        hi: {
+            app_title: "🥑 एवोकैडो क्यूए और खाद्य सुरक्षा", sign_out: "साइन आउट", sys_gateway: "सिस्टम गेटवे",
+            login_sub: "कृपया गुणवत्ता आश्वासन प्रशासक द्वारा जारी क्रेडेंशियल दर्ज करें।",
+            lbl_username: "यूज़रनेम", lbl_password: "पासवर्ड", btn_authenticate: "प्रमाणित करें",
+            qa_insp_sheet: "क्यूए निरीक्षण शीट", lbl_inspector: "निरीक्षक का नाम", lbl_temp: "महत्वपूर्ण नियंत्रण तापमान (°C) - यदि लागू हो",
+            lbl_status: "स्वच्छता और सुरक्षा स्थिति", opt_select: "वर्तमान मूल्यांकन चुनें", opt_compliant: "पूर्णतः अनुपालन (कोई समस्या नहीं मिली)",
+            opt_minor: "मामूली विसंगति (साइट पर सुधार किया गया)", opt_critical: "गंभीर गैर-अनुपालन (कार्रवाई आवश्यक)",
+            lbl_notes: "अवलोकन लॉग / सुधारात्मक कार्रवाई", lbl_photo: "प्रमाण छवि (कैमरा / गैलरी कैप्चर)",
+            btn_submit_report: "केंद्रीय डेटाबेस में ऑडिट लॉग करें", btn_rev_reports: "रिपोर्ट की समीक्षा करें", btn_manage_keys: "पहुंच कुंजी प्रबंधित करें",
+            master_audit_logs: "मास्टर ऑडिट लॉग", lbl_filter: "ऑपरेशन विंग द्वारा रिपोर्ट फ़िल्टर करें", wing_all: "सभी श्रेणियां संयुक्त",
+            wing_hot: "हॉट सेक्शन", wing_warehouse: "गोदाम (वेयरहाउस)", wing_garde: "गार्ड मंजर (कोल्ड किचन)", wing_fleet: "परिवहन (फ्लीट)",
+            wing_housekeeping: "हाउसकीपिंग", wing_packing_prep: "पैकिंग और तैयारी", wing_packing: "पैकिंग",
+            wing_repair: "मरम्मत और रखरखाव", wing_bakery: "बेकरी और मिठाई", wing_qa: "गुणवत्ता और खाद्य सुरक्षा", wing_butchery: "बूचड़ी (मांस विभाग)",
+            gen_user_keys: "यूज़र कुंजी उत्पन्न करें", lbl_assign_username: "यूज़रनेम असाइन करें", lbl_assign_password: "सुरक्षित पासवर्ड असाइन करें",
+            lbl_auth_wing: "केवल अधिकृत विंग असाइनमेंट", opt_assign_sector: "लक्षित क्षेत्र असाइन करें", btn_save_access: "सहेजें और पहुंच दर्ज करें",
+            active_creds: "सक्रिय पहुंच क्रेडेंशियल", alert_success: "निरीक्षण रिकॉर्ड सफलतापूर्वक केंद्रीय गुणवत्ता बही में जमा किया गया।",
+            no_reports: "इस श्रेणी से मेल खाने वाला कोई सुरक्षा लॉग नहीं मिला।", msg_user_exists: "यह यूज़रनेम पहले से मौजूद है!", msg_access_granted: "पहुंच प्रदान की गई: "
+        },
+        ur: {
+            app_title: "🥑 ایوکاڈو کیو اے اور فوڈ سیفٹی", sign_out: "سائن آؤٹ", sys_gateway: "سستم گیٹ وے",
+            login_sub: "براہ کرم کوالٹی اشورنس ایڈمنسٹریٹر کے جاری کردہ ک्रेडेंशियल درج کریں۔",
+            lbl_username: "صارف کا نام (Username)", lbl_password: "پاس ورڈ", btn_authenticate: "لاگ ان کریں",
+            qa_insp_sheet: "کیو اے معائنہ فارم", lbl_inspector: "انسپکٹر کا نام", lbl_temp: "کنٹرول درجہ حرارت (°C) - اگر لاگو ہو",
+            lbl_status: "صفائی اور حفاظت کی صورتحال", opt_select: "موجودہ تشخیص کا انتخاب کریں", opt_compliant: "مکمل تعمیل (کوئی مسئلہ نہیں پایا گیا)",
+            opt_minor: "معمولی فرق (موقع پر درست کر دیا گیا)", opt_critical: "سخت عدم تعمیل (فوری کارروائی درکار ہے)",
+            lbl_notes: "مشاہدات لاگ / اصلاحی اقدامات", lbl_photo: "ثبوت کی تصویر (کیمرہ / گیلری اپ لوڈ)",
+            btn_submit_report: "مرکزی ڈیٹا بیس میں محفوظ کریں", btn_rev_reports: "رپورٹس دیکھیں", btn_manage_keys: "صارفین کے اکاؤنٹس",
+            master_audit_logs: "ماسٹر آڈٹ لاگز", lbl_filter: "شعبہ کے لحاظ سے فلٹر کریں", wing_all: "تمام شعبہ جات مشترکہ",
+            wing_hot: "ہاٹ سیکشن", wing_warehouse: "گودام (ویئر ہاؤس)", wing_garde: "گارڈ مینجر (کولڈ کچن)", wing_fleet: "ٹرانسپورٹ اور لاجسٹکس",
+            wing_housekeeping: "ہاؤس کیپنگ", wing_packing_prep: "پیکنگ اور تیاری", wing_packing: "پیکنگ",
+            wing_repair: "مرمت اور دیکھ بھال", wing_bakery: "بیکری اور مٹھائیاں", wing_qa: "کوالٹی اور فوڈ سیفٹی", wing_butchery: "قصاب خانہ (میٹر سیکشن)",
+            gen_user_keys: "نیا اکاؤنٹ بنائیں", lbl_assign_username: "صارف کا نام تفویض کریں", lbl_assign_password: "پاس ورڈ تفویض کریں",
+            lbl_auth_wing: "صرف مجاز شعبہ تفویض کریں", opt_assign_sector: "متعلقہ شعبہ منتخب کریں", btn_save_access: "محفوظ کریں اور رجسٹر کریں",
+            active_creds: "فعال اکاؤنٹس کی تفصیلات", alert_success: "معائنہ رپورٹ کامیابی کے ساتھ مرکزی ڈیٹا بیس میں جمع کر دی گئی۔",
+            no_reports: "اس شعبے کا کوئی لاگ نہیں ملا۔", msg_user_exists: "یہ صارف نام پہلے سے موجود ہے!", msg_access_granted: "صلاحیت فراہم کی گئی برائے: "
+        }
+    };
+
+    let currentLang = 'en';
+
+    function changeLanguage(lang) {
+        currentLang = lang;
+        document.body.className = (lang === 'ar' || lang === 'ur') ? 'rtl' : 'ltr';
+        document.querySelectorAll('[data-key]').forEach(elem => {
+            const key = elem.getAttribute('data-key');
+            if (langData[lang][key]) { elem.innerText = langData[lang][key]; }
+        });
+        updatePlaceholders(lang);
+        if (currentUser) {
+            if (currentUser.role === 'admin') {
+                renderReports(); renderUsersList();
+            } else {
+                const sectionTranslated = langData[lang][`wing_${currentUser.section.replace(/ and | & /g, '_').replace(/ /g, '_')}`] || currentUser.section;
+                document.getElementById('user-section-badge').innerText = `${lang === 'ar' || lang === 'ur' ? 'القسم' : 'WING'}: ${sectionTranslated.toUpperCase()}`;
+                document.getElementById('user-form-title').innerText = `${sectionTranslated.toUpperCase()} ${langData[lang]['qa_insp_sheet']}`;
+            }
+        }
+    }
+
+    function updatePlaceholders(lang) {
+        const placeholders = {
+            en: { username: "e.g., john_qa", temp: "e.g., 4.2 or N/A", notes: "Detail logs...", uName: "e.g., butchery_team", uPass: "Secure password" },
+            ne: { username: "उदा. john_qa", temp: "उदा. 4.2", notes: "विवरण...", uName: "उदा. butchery_team", uPass: "सुरक्षित पासवर्ड" },
+            bn: { username: "যেমন, john_qa", temp: "যেমন, 4.2", notes: "বিস্তারিত...", uName: "যেমন, butchery_team", uPass: "সুরक्षित পাসওয়ার্ড" },
+            ar: { username: "مثال: john_qa", temp: "مثال: 4.2", notes: "تفاصيل...", uName: "مثال: butchery_team", uPass: "كلمة مرور" },
+            hi: { username: "जैसे, john_qa", temp: "जैसे, 4.2", notes: "विवरण...", uName: "जैसे, butchery_team", uPass: "सुरक्षित पासवर्ड" },
+            ur: { username: "مثال: john_qa", temp: "مثال: 4.2", notes: "تفصیل...", uName: "مثال: butchery_team", uPass: "پاس ورڈ" }
+        };
+        document.getElementById('login-username').placeholder = placeholders[lang].username;
+        document.getElementById('form-temperature').placeholder = placeholders[lang].temp;
+        document.getElementById('form-notes').placeholder = placeholders[lang].notes;
+        document.getElementById('new-username').placeholder = placeholders[lang].uName;
+        document.getElementById('new-password').placeholder = placeholders[lang].uPass;
+    }
+
+    let appUsers = JSON.parse(localStorage.getItem('avocado_users')) || [
+        { username: 'admin', password: '123', role: 'admin', section: 'all' },
+        { username: 'hotsection_user', password: '123', role: 'user', section: 'hot section' },
+        { username: 'butchery_user', password: '123', role: 'user', section: 'butchery' }
+    ];
+    let auditReports = JSON.parse(localStorage.getItem('avocado_reports')) || [];
+    let currentUser = null;
+
+    if(!localStorage.getItem('avocado_users')) { localStorage.setItem('avocado_users', JSON.stringify(appUsers)); }
+
+    function handleLogin(e) {
+        e.preventDefault();
+        const userIn = document.getElementById('login-username').value.trim();
+        const passIn = document.getElementById('login-password').value;
+        const foundUser = appUsers.find(u => u.username.toLowerCase() === userIn.toLowerCase() && u.password === passIn);
+        if(foundUser) {
+            currentUser = foundUser;
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('header-logout').classList.remove('hidden');
+            if(foundUser.role === 'admin') {
+                document.getElementById('view-admin').classList.remove('hidden');
+                toggleAdminSubView('admin-reports');
+            } else {
+                document.getElementById('view-user').classList.remove('hidden');
+                changeLanguage(currentLang);
+                document.getElementById('form-inspector').value = foundUser.username;
+            }
+        } else { alert('Invalid Credentials.'); }
+    }
+
+    function logout() {
+        currentUser = null;
+        document.getElementById('view-admin').classList.add('hidden');
+        document.getElementById('view-user').classList.add('hidden');
+        document.getElementById('header-logout').classList.add('hidden');
+        document.getElementById('view-login').classList.remove('hidden');
+    }
+
+    function toggleAdminSubView(target) {
+        if(target === 'admin-reports') {
+            document.getElementById('subview-reports').classList.remove('hidden');
+            document.getElementById('subview-users').classList.add('hidden');
+            renderReports();
+        } else {
+            document.getElementById('subview-reports').classList.add('hidden');
+            document.getElementById('subview-users').classList.remove('hidden');
+            renderUsersList();
+        }
+    }
+
+    function handleUserCreation(e) {
+        e.preventDefault();
+        const uName = document.getElementById('new-username').value.trim().toLowerCase();
+        const uPass = document.getElementById('new-password').value;
+        const uSec = document.getElementById('new-section').value;
+        if(appUsers.some(u => u.username === uName)) { alert('Exists.'); return; }
+        appUsers.push({ username: uName, password: uPass, role: 'user', section: uSec });
+        localStorage.setItem('avocado_users', JSON.stringify(appUsers));
+        document.getElementById('new-username').value = '';
+        document.getElementById('new-password').value = '';
+        renderUsersList();
+    }
+
+    function renderUsersList() {
+        const container = document.getElementById('users-list-container');
+        const regularUsers = appUsers.filter(u => u.role !== 'admin');
+        if(regularUsers.length === 0) { container.innerHTML = '<p>No personnel.</p>'; return; }
+        container.innerHTML = regularUsers.map(u => `
+            <div class="user-item">
+                <span>User: <strong>${u.username}</strong></span>
+                <span class="section-badge">${u.section}</span>
+            </div>
+        `).join('');
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        const temp = document.getElementById('form-temperature').value || 'N/A';
+        const status = document.getElementById('form-checklist').value;
+        const notes = document.getElementById('form-notes').value;
+        const photoFile = document.getElementById('form-photo').files[0];
+        if(!photoFile) return;
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            const report = { id: Date.now(), inspector: currentUser.username, section: currentUser.section, temperature: temp, status: status, notes: notes, image: reader.result, timestamp: new Date().toLocaleString() };
+            auditReports.unshift(report);
+            localStorage.setItem('avocado_reports', JSON.stringify(auditReports));
+            alert(langData[currentLang]['alert_success']);
+            document.getElementById('monitoring-form').reset();
+            document.getElementById('form-inspector').value = currentUser.username;
+        }
+        reader.readAsDataURL(photoFile);
+    }
+
+    function renderReports() {
+        const feed = document.getElementById('reports-feed');
+        const filterValue = document.getElementById('filter-section').value;
+        const filtered = filterValue === 'ALL' ? auditReports : auditReports.filter(r => r.section === filterValue);
+        if(filtered.length === 0) { feed.innerHTML = '<p>No safety logs.</p>'; return; }
+        feed.innerHTML = filtered.map(r => `
+            <div class="report-card">
+                <div><strong>Sector:</strong> ${r.section.toUpperCase()}</div>
+                <div><strong>Notes:</strong> ${r.notes}</div>
+            </div>
+        `).join('');
+    }
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
+        });
+    }
+    changeLanguage('en');
+</script>
+</body>
+</html>
